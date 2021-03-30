@@ -28,7 +28,6 @@ export class MyComponent {
 
   @Method()
   sayHello() {
-    console.log('Say some hello from the end!');
     return Promise.resolve(45);
   }
 

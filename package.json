@@ -1,6 +1,6 @@
 {
-  "name": "components-set",
-  "version": "0.0.1",
+  "name": "@we5a/components-set",
+  "version": "0.0.2",
   "description": "Stencil Component Starter",
   "main": "dist/index.cjs.js",
   "module": "dist/index.js",
@@ -10,6 +10,9 @@
   "collection": "dist/collection/collection-manifest.json",
   "collection:main": "dist/collection/index.js",
   "unpkg": "dist/components-set/components-set.esm.js",
+  "repository": {
+    "url": "https://github.com/we5a/components-set.git"
+  },
   "files": [
     "dist/",
     "loader/"
@@ -22,7 +25,8 @@
     "generate": "stencil generate"
   },
   "dependencies": {
-    "@stencil/core": "^2.0.1"
+    "@stencil/core": "^2.0.1",
+    "face-api.js": "^0.22.2"
   },
   "license": "MIT",
   "devDependencies": {
