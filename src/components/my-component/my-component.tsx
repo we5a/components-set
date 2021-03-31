@@ -32,6 +32,6 @@ export class MyComponent {
   }
 
   render() {
-    return <div style={{textAlign: 'center'}}>Face Detector {this.getText()}</div>;
+    return <div class="container">Face Detector {this.getText()}</div>;
   }
 }

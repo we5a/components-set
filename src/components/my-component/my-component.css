@@ -1,3 +1,10 @@
 :host {
   display: block;
 }
+
+.container {
+  text-align: center;
+  margin-bottom: 15px;
+  font-size: 1.2em;
+  font-family: sans-serif;
+}
