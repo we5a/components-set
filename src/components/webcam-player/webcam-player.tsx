@@ -10,11 +10,11 @@ import * as faceapi from 'face-api.js';
 export class WebcamPlayer {
   private player: HTMLVideoElement;
   private canvas: HTMLCanvasElement;
-  private cameraStream: any = null;
+  private cameraStream: MediaStream = null;
   private mediaSupport = 'mediaDevices' in navigator;
   private predictedAges = [];
   @Element() private hostElement: HTMLElement;
-  @State() isRecognizing: boolean = true;
+  isRecognizing: boolean = true;
 
   private readonly TINY_OPTIONS = {
     inputSize: 512,
@@ -31,10 +31,11 @@ export class WebcamPlayer {
       const mediaStream = await navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } });
       this.cameraStream = mediaStream;
       this.player.srcObject = mediaStream;
-      this.player.play();
+      await this.player.play();
 
       await this.loadModels();
       console.log('Models loaded');
+      this.isRecognizing = true;
       await this.onPlay();
     }
     else {
@@ -46,6 +47,7 @@ export class WebcamPlayer {
   handleStop() {
     console.log('Stop streaming');
     this.isRecognizing = false;
+
     if (null != this.cameraStream) {
       const track = this.cameraStream.getTracks()[0];
       track.stop();
@@ -76,12 +78,10 @@ export class WebcamPlayer {
   async onPlay() {
     const opts = new faceapi.TinyFaceDetectorOptions(this.TINY_OPTIONS);
     const result = await faceapi.detectSingleFace(this.player, opts)
-      .withAgeAndGender();
+      .withAgeAndGender()
 
-      if (result) {
-        const dims = faceapi.matchDimensions(this.canvas, this.player, true);
-        const resizedResult: any = faceapi.resizeResults(this.canvas, dims);
-        console.log('Resized result', resizedResult);
+    if (result) {
+      faceapi.matchDimensions(this.canvas, this.player, true);
       faceapi.draw.drawDetections(this.canvas, result);
 
       const { age, gender, genderProbability } = result;
@@ -95,9 +95,12 @@ export class WebcamPlayer {
         result.detection.box.bottomLeft
       ).draw(this.canvas);
     }
+
     if (this.isRecognizing) {
-      setTimeout(() => this.onPlay());
-    } 
+      setTimeout(() => {
+        this.onPlay();
+      });
+    }
   }
 
   render() {
@@ -115,5 +118,3 @@ export class WebcamPlayer {
     );
   }
 }
-
-// autoplay muted playsInline
