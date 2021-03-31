@@ -32,6 +32,6 @@ export class MyComponent {
   }
 
   render() {
-    return <div style={{textAlign: 'center'}}>Hello#, World! I'm from Stencil with love {this.getText()}</div>;
+    return <div style={{textAlign: 'center'}}>Face Detector {this.getText()}</div>;
   }
 }

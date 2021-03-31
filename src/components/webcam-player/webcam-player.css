@@ -26,6 +26,7 @@
 
 #overlay {
   position: absolute;
+  z-index: 3;
 }
 
 .button {
