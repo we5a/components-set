@@ -1,4 +1,4 @@
-import { Component, h, Element, getAssetPath, State } from '@stencil/core';
+import { Component, h, Element, getAssetPath } from '@stencil/core';
 import * as faceapi from 'face-api.js';
 
 @Component({
@@ -13,6 +13,8 @@ export class WebcamPlayer {
   private cameraStream: MediaStream = null;
   private mediaSupport = 'mediaDevices' in navigator;
   private predictedAges = [];
+  private VIDEO_SIZE = { width: 320, height: 240 };
+  public screenshots: string[] = [];
   @Element() private hostElement: HTMLElement;
   isRecognizing: boolean = true;
 
@@ -28,7 +30,7 @@ export class WebcamPlayer {
 
   async handleStart() {
     if (this.mediaSupport && null == this.cameraStream) {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } });
+      const mediaStream = await navigator.mediaDevices.getUserMedia({ video: this.VIDEO_SIZE });
       this.cameraStream = mediaStream;
       this.player.srcObject = mediaStream;
       await this.player.play();
@@ -103,6 +105,20 @@ export class WebcamPlayer {
     }
   }
 
+  takeScreenshot() {
+    console.log('Screenshot');
+    if (!this.player.paused) {
+      const interimCanvas = document.createElement('canvas');
+      interimCanvas.width = this.VIDEO_SIZE.width;
+      interimCanvas.height = this.VIDEO_SIZE.height;
+      const ctx = interimCanvas.getContext('2d');
+      ctx.drawImage(this.player, 0, 0);
+      const base64 = interimCanvas.toDataURL('image/jpeg', 0.7);
+      this.screenshots.push(base64);
+      return base64;
+    }
+  }
+
   render() {
     return (
       <div class="container">
@@ -111,8 +127,9 @@ export class WebcamPlayer {
         </div>
         <canvas id="overlay" width="320" height="240" />
         <div class="button-block">
-          <button class="button button-start" onClick={this.handleStart.bind(this)}>Start Streaming</button>
-          <button class="button button-stop" onClick={this.handleStop.bind(this)}>Stop Streaming</button>
+          <button class="player-button" onClick={this.handleStart.bind(this)}>Start Streaming</button>
+          <button class="player-button" onClick={this.handleStop.bind(this)}>Stop Streaming</button>
+          <button class="player-button" onClick={this.takeScreenshot.bind(this)}>Take Screenshot</button>
         </div>
       </div>
     );

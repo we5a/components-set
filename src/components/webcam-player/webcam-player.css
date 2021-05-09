@@ -29,7 +29,22 @@
   z-index: 3;
 }
 
-.button {
+.player-button {
   margin-right: 10px;
   margin-bottom: 10px;
+  padding: 5px 10px;
+  outline: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  border-radius: 15px;
+  color: white;
+  background-color: #994d00;
+}
+
+.player-button:hover {
+  color: #ffe6cc;
+}
+
+.player-button:active {
+  color: darkorange;
 }
