@@ -58,6 +58,7 @@ declare namespace LocalJSX {
         "middle"?: string;
     }
     interface WebcamPlayer {
+        "onScreenshotReceived"?: (event: CustomEvent<any>) => void;
     }
     interface IntrinsicElements {
         "my-component": MyComponent;
