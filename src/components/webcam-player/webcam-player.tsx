@@ -1,4 +1,4 @@
-import { Component, h, Element, getAssetPath } from '@stencil/core';
+import { Component, h, Element, getAssetPath, Prop } from '@stencil/core';
 import * as faceapi from 'face-api.js';
 
 @Component({
@@ -16,6 +16,7 @@ export class WebcamPlayer {
   private VIDEO_SIZE = { width: 320, height: 240 };
   public screenshots: string[] = [];
   @Element() private hostElement: HTMLElement;
+  @Prop() screenshotHandler: (img: string) => void;
   isRecognizing: boolean = true;
 
   private readonly TINY_OPTIONS = {
@@ -115,8 +116,7 @@ export class WebcamPlayer {
       ctx.drawImage(this.player, 0, 0);
       const base64 = interimCanvas.toDataURL('image/jpeg', 0.7);
       this.screenshots.push(base64);
-      const screenshotEvent = new CustomEvent('screenshot', { detail: base64 });
-      document.dispatchEvent(screenshotEvent);
+      this.screenshotHandler(base64);
       return base64;
     }
   }
