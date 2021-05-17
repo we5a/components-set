@@ -115,6 +115,8 @@ export class WebcamPlayer {
       ctx.drawImage(this.player, 0, 0);
       const base64 = interimCanvas.toDataURL('image/jpeg', 0.7);
       this.screenshots.push(base64);
+      const screenshotEvent = new CustomEvent('screenshot', { detail: base64 });
+      document.dispatchEvent(screenshotEvent);
       return base64;
     }
   }
