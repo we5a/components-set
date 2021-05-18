@@ -1,5 +1,6 @@
 import { Component, h, Element, getAssetPath, Event, EventEmitter } from '@stencil/core';
 import * as faceapi from 'face-api.js';
+import uniqid from 'uniqid';
 
 @Component({
   tag: 'webcam-player',
@@ -14,7 +15,6 @@ export class WebcamPlayer {
   private mediaSupport = 'mediaDevices' in navigator;
   private predictedAges = [];
   private VIDEO_SIZE = { width: 320, height: 240 };
-  public screenshots: string[] = [];
   @Element() private hostElement: HTMLElement;
   @Event() screenshotReceived: EventEmitter;
   isRecognizing: boolean = true;
@@ -115,9 +115,7 @@ export class WebcamPlayer {
       const ctx = interimCanvas.getContext('2d');
       ctx.drawImage(this.player, 0, 0);
       const base64 = interimCanvas.toDataURL('image/jpeg', 0.7);
-      this.screenshots.push(base64);
-      this.screenshotReceived.emit(base64);
-      return base64;
+      this.screenshotReceived.emit({ id: uniqid(), image: base64 });
     }
   }
 
