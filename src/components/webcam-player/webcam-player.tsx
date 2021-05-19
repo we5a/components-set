@@ -121,12 +121,17 @@ export class WebcamPlayer {
     }
   }
 
-  blinkPlayer(duration: number) {
+  blinkPlayer(duration: number, periods: number = 1) {
     this.highlightedPlayer = true;
 
-    setTimeout(() => {
-      this.highlightedPlayer = false;
+    const intervalId = setInterval(() => {
+      this.highlightedPlayer = !this.highlightedPlayer;
     }, duration * 1000);
+
+    setTimeout(() => {
+      clearInterval(intervalId);
+      this.highlightedPlayer = false;
+    }, duration * 1000 * periods);
   }
 
   render() {
