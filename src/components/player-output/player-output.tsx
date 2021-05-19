@@ -1,4 +1,4 @@
-import { Component, Host, h } from '@stencil/core';
+import { Component, Host, h, Prop } from '@stencil/core';
 
 @Component({
   tag: 'player-output',
@@ -6,11 +6,13 @@ import { Component, Host, h } from '@stencil/core';
   shadow: true,
 })
 export class PlayerOutput {
+  @Prop({reflect: true}) message: string;
 
   render() {
     return (
       <Host>
-        <slot></slot>
+        {this.message}
+        {/* <slot></slot> */}
       </Host>
     );
   }

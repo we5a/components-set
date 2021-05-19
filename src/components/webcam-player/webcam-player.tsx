@@ -15,9 +15,11 @@ export class WebcamPlayer {
   private mediaSupport = 'mediaDevices' in navigator;
   private predictedAges = [];
   private VIDEO_SIZE = { width: 320, height: 240 };
+  private isCountdown: boolean = false;
   @Element() private hostElement: HTMLElement;
   @Event() screenshotReceived: EventEmitter;
   @State() highlightedPlayer: boolean = false;
+  @State() outputMessage: string = '';
   isRecognizing: boolean = true;
 
   private readonly TINY_OPTIONS = {
@@ -134,6 +136,30 @@ export class WebcamPlayer {
     }, duration * 1000 * periods);
   }
 
+  async sleep(time: number) {
+    await new Promise((resolve) => {
+      setTimeout(() => void resolve(null), time * 1000);
+    });
+  }
+
+  async rememberFace() {
+    console.log('Need to remember face');
+    if (!this.isCountdown) {
+      this.isCountdown = true;
+      let count = 3;
+      this.outputMessage = `Be near the cam, slightly rotate head ${count}...`;
+      const interval = setInterval(() => {
+        --count;
+        this.outputMessage = `Be near the cam, slightly rotate head ${count}...`;
+        if (count <= 0) {
+          clearInterval(interval);
+          this.isCountdown = false;
+          this.outputMessage = '';
+        }
+      }, 1000);
+    }
+  }
+
   render() {
     return (
       <Host>
@@ -146,9 +172,10 @@ export class WebcamPlayer {
             <button class="player-button" onClick={this.handleStart.bind(this)}>Start Streaming</button>
             <button class="player-button" onClick={this.handleStop.bind(this)}>Stop Streaming</button>
             <button class="player-button" onClick={this.takeScreenshot.bind(this)}>Take Screenshot</button>
+            <button class="player-button" onClick={this.rememberFace.bind(this)}>Remember Me</button>
           </div>
         </div>
-        <player-output>Default</player-output>
+        <player-output message = {this.outputMessage}></player-output>
       </Host>
     );
   }

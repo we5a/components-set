@@ -22,6 +22,7 @@ export namespace Components {
         "sayHello": () => Promise<number>;
     }
     interface PlayerOutput {
+        "message": string;
     }
     interface WebcamPlayer {
     }
@@ -67,6 +68,7 @@ declare namespace LocalJSX {
         "middle"?: string;
     }
     interface PlayerOutput {
+        "message"?: string;
     }
     interface WebcamPlayer {
         "onScreenshotReceived"?: (event: CustomEvent<any>) => void;
