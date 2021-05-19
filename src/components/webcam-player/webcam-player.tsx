@@ -1,4 +1,4 @@
-import { Component, h, Element, getAssetPath, Event, EventEmitter } from '@stencil/core';
+import { Component, h, Element, getAssetPath, Event, EventEmitter, State } from '@stencil/core';
 import * as faceapi from 'face-api.js';
 import uniqid from 'uniqid';
 
@@ -17,6 +17,7 @@ export class WebcamPlayer {
   private VIDEO_SIZE = { width: 320, height: 240 };
   @Element() private hostElement: HTMLElement;
   @Event() screenshotReceived: EventEmitter;
+  @State() highlightedPlayer: boolean = false;
   isRecognizing: boolean = true;
 
   private readonly TINY_OPTIONS = {
@@ -116,14 +117,23 @@ export class WebcamPlayer {
       ctx.drawImage(this.player, 0, 0);
       const base64 = interimCanvas.toDataURL('image/jpeg', 0.7);
       this.screenshotReceived.emit({ id: uniqid(), image: base64 });
+      this.blinkPlayer(0.25);
     }
+  }
+
+  blinkPlayer(duration: number) {
+    this.highlightedPlayer = true;
+
+    setTimeout(() => {
+      this.highlightedPlayer = false;
+    }, duration * 1000);
   }
 
   render() {
     return (
       <div class="container">
         <div class="player-block">
-          <video id="player" width="320" height="240" muted playsinline></video>
+          <video id="player" class={this.highlightedPlayer ? 'outlined' : ''} width="320" height="240" muted playsinline></video>
         </div>
         <canvas id="overlay" width="320" height="240" />
         <div class="button-block">

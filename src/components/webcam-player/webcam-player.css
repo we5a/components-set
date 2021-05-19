@@ -41,6 +41,10 @@
   background-color: #994d00;
 }
 
+.outlined {
+  outline: 3px groove orangered;
+}
+
 .player-button:hover {
   color: #ffe6cc;
 }
