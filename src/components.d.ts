@@ -21,6 +21,8 @@ export namespace Components {
         "middle": string;
         "sayHello": () => Promise<number>;
     }
+    interface PlayerOutput {
+    }
     interface WebcamPlayer {
     }
 }
@@ -31,6 +33,12 @@ declare global {
         prototype: HTMLMyComponentElement;
         new (): HTMLMyComponentElement;
     };
+    interface HTMLPlayerOutputElement extends Components.PlayerOutput, HTMLStencilElement {
+    }
+    var HTMLPlayerOutputElement: {
+        prototype: HTMLPlayerOutputElement;
+        new (): HTMLPlayerOutputElement;
+    };
     interface HTMLWebcamPlayerElement extends Components.WebcamPlayer, HTMLStencilElement {
     }
     var HTMLWebcamPlayerElement: {
@@ -39,6 +47,7 @@ declare global {
     };
     interface HTMLElementTagNameMap {
         "my-component": HTMLMyComponentElement;
+        "player-output": HTMLPlayerOutputElement;
         "webcam-player": HTMLWebcamPlayerElement;
     }
 }
@@ -57,11 +66,14 @@ declare namespace LocalJSX {
          */
         "middle"?: string;
     }
+    interface PlayerOutput {
+    }
     interface WebcamPlayer {
         "onScreenshotReceived"?: (event: CustomEvent<any>) => void;
     }
     interface IntrinsicElements {
         "my-component": MyComponent;
+        "player-output": PlayerOutput;
         "webcam-player": WebcamPlayer;
     }
 }
@@ -70,6 +82,7 @@ declare module "@stencil/core" {
     export namespace JSX {
         interface IntrinsicElements {
             "my-component": LocalJSX.MyComponent & JSXBase.HTMLAttributes<HTMLMyComponentElement>;
+            "player-output": LocalJSX.PlayerOutput & JSXBase.HTMLAttributes<HTMLPlayerOutputElement>;
             "webcam-player": LocalJSX.WebcamPlayer & JSXBase.HTMLAttributes<HTMLWebcamPlayerElement>;
         }
     }

@@ -1,4 +1,4 @@
-import { Component, h, Element, getAssetPath, Event, EventEmitter, State } from '@stencil/core';
+import { Component, h, Element, getAssetPath, Event, EventEmitter, State, Host } from '@stencil/core';
 import * as faceapi from 'face-api.js';
 import uniqid from 'uniqid';
 
@@ -136,17 +136,20 @@ export class WebcamPlayer {
 
   render() {
     return (
-      <div class="container">
-        <div class="player-block">
-          <video id="player" class={this.highlightedPlayer ? 'outlined' : ''} width="320" height="240" muted playsinline></video>
+      <Host>
+        <div class="container">
+          <div class="player-block">
+            <video id="player" class={{ 'outlined': this.highlightedPlayer }} width="320" height="240" muted playsinline></video>
+          </div>
+          <canvas id="overlay" width="320" height="240" />
+          <div class="button-block">
+            <button class="player-button" onClick={this.handleStart.bind(this)}>Start Streaming</button>
+            <button class="player-button" onClick={this.handleStop.bind(this)}>Stop Streaming</button>
+            <button class="player-button" onClick={this.takeScreenshot.bind(this)}>Take Screenshot</button>
+          </div>
         </div>
-        <canvas id="overlay" width="320" height="240" />
-        <div class="button-block">
-          <button class="player-button" onClick={this.handleStart.bind(this)}>Start Streaming</button>
-          <button class="player-button" onClick={this.handleStop.bind(this)}>Stop Streaming</button>
-          <button class="player-button" onClick={this.takeScreenshot.bind(this)}>Take Screenshot</button>
-        </div>
-      </div>
+        <player-output>Default</player-output>
+      </Host>
     );
   }
 }
