@@ -27,6 +27,8 @@ export class WebcamPlayer {
     scoreThreshold: 0.5
   }
 
+  opts = new faceapi.TinyFaceDetectorOptions(this.TINY_OPTIONS);
+
   componentDidLoad() {
     this.player = this.hostElement.querySelector('#player');
     this.canvas = this.hostElement.querySelector('#overlay');
@@ -82,8 +84,7 @@ export class WebcamPlayer {
   }
 
   async onPlay() {
-    const opts = new faceapi.TinyFaceDetectorOptions(this.TINY_OPTIONS);
-    const result = await faceapi.detectSingleFace(this.player, opts)
+    const result = await faceapi.detectSingleFace(this.player, this.opts)
       .withAgeAndGender()
 
     if (result) {
@@ -109,17 +110,28 @@ export class WebcamPlayer {
     }
   }
 
-  takeScreenshot() {
+  handleScreenshot() {
     console.log('Screenshot');
     if (!this.player.paused) {
-      const interimCanvas = document.createElement('canvas');
-      interimCanvas.width = this.VIDEO_SIZE.width;
-      interimCanvas.height = this.VIDEO_SIZE.height;
-      const ctx = interimCanvas.getContext('2d');
-      ctx.drawImage(this.player, 0, 0);
-      const base64 = interimCanvas.toDataURL('image/jpeg', 0.7);
+      const base64 = this.takeScreenshot();
       this.screenshotReceived.emit({ id: uniqid(), image: base64 });
       this.blinkPlayer(0.25);
+    }
+  }
+
+  takeScreenshot(outputType?: "canvas" | "base64") {
+    const interimCanvas = document.createElement('canvas');
+    interimCanvas.width = this.VIDEO_SIZE.width;
+    interimCanvas.height = this.VIDEO_SIZE.height;
+    const ctx = interimCanvas.getContext('2d');
+    ctx.drawImage(this.player, 0, 0);
+    switch (outputType) {
+      case 'canvas':
+        return interimCanvas;
+      case 'base64':
+        return interimCanvas.toDataURL('image/jpeg', 0.7);
+      default:
+        return interimCanvas.toDataURL('image/jpeg', 0.7);
     }
   }
 
@@ -155,9 +167,53 @@ export class WebcamPlayer {
           clearInterval(interval);
           this.isCountdown = false;
           this.outputMessage = '';
+          console.log('Have to start screenshots...');
+          this.takeScreenshotsSeries(5);
         }
       }, 1000);
     }
+  }
+
+  async takeScreenshotsSeries(shotNumber: number) {
+    const screenshots: HTMLCanvasElement[] = [];
+
+    const interval = setInterval(async () => {
+      const shot = this.takeScreenshot('canvas');
+      screenshots.push(shot as HTMLCanvasElement);
+      this.blinkPlayer(0.25);
+      if (screenshots.length === shotNumber) {
+        this.createPerson(screenshots);
+        clearInterval(interval);
+      }
+    }, 800);
+  }
+
+  async createPerson(shots: HTMLCanvasElement[]) {
+    const images: string[] = [];
+    const age = [];
+    const gender = { male: 0, female: 0 }; 
+
+    for await (const frame of shots) {
+      const faceDetection = await faceapi.detectSingleFace(frame, this.opts)
+        .withAgeAndGender();
+      console.log('Face Detection', faceDetection);
+
+      if (faceDetection) {
+        age.push(Math.round(faceDetection.age));
+        gender[faceDetection.gender] = gender[faceDetection.gender] + 1;
+        const faceCanvas = await faceapi.extractFaces(frame, [faceDetection.detection]);
+        const faceBase64 = faceCanvas[0].toDataURL('image/jpeg', 0.7);
+        images.push(faceBase64);
+      }
+    }
+    const person = {
+      id: uniqid(),
+      age: Math.round(age.reduce((acc, el) => acc + el) / age.length),
+      gender: gender["male"] > gender["female"] ? "male" : "female",
+      images 
+    };
+    console.log('Person', person);
+    // show Name Modal here
   }
 
   render() {
@@ -171,11 +227,11 @@ export class WebcamPlayer {
           <div class="button-block">
             <button class="player-button" onClick={this.handleStart.bind(this)}>Start Streaming</button>
             <button class="player-button" onClick={this.handleStop.bind(this)}>Stop Streaming</button>
-            <button class="player-button" onClick={this.takeScreenshot.bind(this)}>Take Screenshot</button>
+            <button class="player-button" onClick={this.handleScreenshot.bind(this)}>Take Screenshot</button>
             <button class="player-button" onClick={this.rememberFace.bind(this)}>Remember Me</button>
           </div>
         </div>
-        <player-output message = {this.outputMessage}></player-output>
+        <player-output message={this.outputMessage}></player-output>
       </Host>
     );
   }
