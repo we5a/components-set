@@ -6,6 +6,8 @@
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 export namespace Components {
+    interface MainModal {
+    }
     interface MyComponent {
         /**
           * The first name
@@ -28,6 +30,12 @@ export namespace Components {
     }
 }
 declare global {
+    interface HTMLMainModalElement extends Components.MainModal, HTMLStencilElement {
+    }
+    var HTMLMainModalElement: {
+        prototype: HTMLMainModalElement;
+        new (): HTMLMainModalElement;
+    };
     interface HTMLMyComponentElement extends Components.MyComponent, HTMLStencilElement {
     }
     var HTMLMyComponentElement: {
@@ -47,12 +55,15 @@ declare global {
         new (): HTMLWebcamPlayerElement;
     };
     interface HTMLElementTagNameMap {
+        "main-modal": HTMLMainModalElement;
         "my-component": HTMLMyComponentElement;
         "player-output": HTMLPlayerOutputElement;
         "webcam-player": HTMLWebcamPlayerElement;
     }
 }
 declare namespace LocalJSX {
+    interface MainModal {
+    }
     interface MyComponent {
         /**
           * The first name
@@ -74,6 +85,7 @@ declare namespace LocalJSX {
         "onScreenshotReceived"?: (event: CustomEvent<any>) => void;
     }
     interface IntrinsicElements {
+        "main-modal": MainModal;
         "my-component": MyComponent;
         "player-output": PlayerOutput;
         "webcam-player": WebcamPlayer;
@@ -83,6 +95,7 @@ export { LocalJSX as JSX };
 declare module "@stencil/core" {
     export namespace JSX {
         interface IntrinsicElements {
+            "main-modal": LocalJSX.MainModal & JSXBase.HTMLAttributes<HTMLMainModalElement>;
             "my-component": LocalJSX.MyComponent & JSXBase.HTMLAttributes<HTMLMyComponentElement>;
             "player-output": LocalJSX.PlayerOutput & JSXBase.HTMLAttributes<HTMLPlayerOutputElement>;
             "webcam-player": LocalJSX.WebcamPlayer & JSXBase.HTMLAttributes<HTMLWebcamPlayerElement>;

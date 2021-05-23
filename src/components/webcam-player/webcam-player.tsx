@@ -232,6 +232,7 @@ export class WebcamPlayer {
           </div>
         </div>
         <player-output message={this.outputMessage}></player-output>
+        <main-modal></main-modal>
       </Host>
     );
   }
