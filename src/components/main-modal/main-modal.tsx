@@ -1,4 +1,4 @@
-import { Component, Host, h, State } from '@stencil/core';
+import { Component, Host, h, State, Prop } from '@stencil/core';
 
 @Component({
   tag: 'main-modal',
@@ -7,9 +7,13 @@ import { Component, Host, h, State } from '@stencil/core';
 })
 export class MainModal {
   @State() nameInput: string = '';
+  @Prop() cancelModal: () => void;
+  @Prop() handleResult: (name: string) => void;
 
   handleName() {
-    console.log('Need to save name', this.nameInput);
+    if (this.nameInput) {
+      this.handleResult(this.nameInput);
+    }
   }
 
   handleChange(e: InputEvent) {
@@ -17,19 +21,14 @@ export class MainModal {
     this.nameInput = (e.target as HTMLInputElement).value;
   }
 
-  cancelModal() {
-    console.log('Need to cancel modal');
-    this.nameInput = '';
-  }
-
   render() {
     return (
       <Host>
         <div class="modal-window">
           <div class="modal-label">Enter name:</div>
-          <input type="text" class="name-input" value={this.nameInput} onInput={this.handleChange.bind(this)}/>
+          <input required type="text" class="name-input" value={this.nameInput} onInput={this.handleChange.bind(this)}/>
           <div class="button-block">
-            <button onClick={this.cancelModal.bind(this)} class="modal-button">Cancel</button>
+            <button onClick={this.cancelModal} class="modal-button">Cancel</button>
             <button onClick={this.handleName.bind(this)} class="modal-button">OK</button>
           </div>
          </div>

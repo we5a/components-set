@@ -7,6 +7,8 @@
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 export namespace Components {
     interface MainModal {
+        "cancelModal": () => void;
+        "handleResult": (name: string) => void;
     }
     interface MyComponent {
         /**
@@ -63,6 +65,8 @@ declare global {
 }
 declare namespace LocalJSX {
     interface MainModal {
+        "cancelModal"?: () => void;
+        "handleResult"?: (name: string) => void;
     }
     interface MyComponent {
         /**

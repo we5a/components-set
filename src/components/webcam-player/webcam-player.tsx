@@ -2,6 +2,14 @@ import { Component, h, Element, getAssetPath, Event, EventEmitter, State, Host }
 import * as faceapi from 'face-api.js';
 import uniqid from 'uniqid';
 
+interface Person {
+  id: string;
+  gender: "male" | "female";
+  age: number;
+  images: string[];
+  name?: string;
+}
+
 @Component({
   tag: 'webcam-player',
   styleUrl: 'webcam-player.css',
@@ -20,6 +28,8 @@ export class WebcamPlayer {
   @Event() screenshotReceived: EventEmitter;
   @State() highlightedPlayer: boolean = false;
   @State() outputMessage: string = '';
+  @State() isNameModal: boolean = false;
+  @State() currentPerson: Person;
   isRecognizing: boolean = true;
 
   private readonly TINY_OPTIONS = {
@@ -191,7 +201,7 @@ export class WebcamPlayer {
   async createPerson(shots: HTMLCanvasElement[]) {
     const images: string[] = [];
     const age = [];
-    const gender = { male: 0, female: 0 }; 
+    const gender = { male: 0, female: 0 };
 
     for await (const frame of shots) {
       const faceDetection = await faceapi.detectSingleFace(frame, this.opts)
@@ -206,14 +216,28 @@ export class WebcamPlayer {
         images.push(faceBase64);
       }
     }
-    const person = {
+    this.showModal();
+    this.currentPerson = {
       id: uniqid(),
       age: Math.round(age.reduce((acc, el) => acc + el) / age.length),
       gender: gender["male"] > gender["female"] ? "male" : "female",
-      images 
+      images
     };
-    console.log('Person', person);
-    // show Name Modal here
+  }
+
+  cancelModal() {
+    this.isNameModal = false;
+    this.currentPerson = undefined;
+  }
+
+  showModal() {
+    this.isNameModal = true;
+  }
+
+  handleResult(name: string) {
+    this.isNameModal = false;
+    this.currentPerson = { ...this.currentPerson, name };
+    console.log('Ready person', this.currentPerson);
   }
 
   render() {
@@ -232,7 +256,8 @@ export class WebcamPlayer {
           </div>
         </div>
         <player-output message={this.outputMessage}></player-output>
-        <main-modal></main-modal>
+        { this.isNameModal &&
+          <main-modal cancelModal={this.cancelModal.bind(this)} handleResult={this.handleResult.bind(this)}></main-modal>}
       </Host>
     );
   }

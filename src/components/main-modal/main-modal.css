@@ -1,7 +1,6 @@
 :host {
   display: flex;
   justify-content: center;
-  align-items: center;
   width: 100%;
   height: 100%;
   position: absolute;
@@ -13,12 +12,14 @@
 }
 
 .modal-window {
-  border: 1px solid #994d00;
   min-width: 300px;
+  height: 140px;
+  border: 1px solid #994d00;
+  border-radius: 10px;
+  background-color: rgb(204, 204, 204);
+  margin-top: calc(50vh - 150px);
   padding: 10px;
   font-family: sans-serif;
-  background-color: rgb(204, 204, 204);
-  border-radius: 10px;
 }
 
 .name-input {
