@@ -52,3 +52,16 @@
 .player-button:active {
   color: darkorange;
 }
+
+.name-label {
+  position: absolute;
+  right: 20px;
+  bottom: 10px;
+  border-radius: 15px;
+  background-color: grey;
+  opacity: 0.8;
+  padding: 2px 8px;
+  font-family: sans-serif;
+  font-size: 0.8em;
+  color: white;
+}

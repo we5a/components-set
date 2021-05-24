@@ -24,13 +24,15 @@ export class WebcamPlayer {
   private predictedAges = [];
   private VIDEO_SIZE = { width: 320, height: 240 };
   private isCountdown: boolean = false;
+  private persons: Person[] = [];
+  private isRecognizing: boolean = true;
   @Element() private hostElement: HTMLElement;
   @Event() screenshotReceived: EventEmitter;
   @State() highlightedPlayer: boolean = false;
   @State() outputMessage: string = '';
+  @State() nameLabel: string = '123';
   @State() isNameModal: boolean = false;
   @State() currentPerson: Person;
-  isRecognizing: boolean = true;
 
   private readonly TINY_OPTIONS = {
     inputSize: 512,
@@ -184,6 +186,13 @@ export class WebcamPlayer {
     }
   }
 
+  showMessage(message: string, time: number): void {
+    this.outputMessage = message;
+    setTimeout(() => {
+      this.outputMessage = '';
+    }, time * 1000);
+  }
+
   async takeScreenshotsSeries(shotNumber: number) {
     const screenshots: HTMLCanvasElement[] = [];
 
@@ -237,7 +246,10 @@ export class WebcamPlayer {
   handleResult(name: string) {
     this.isNameModal = false;
     this.currentPerson = { ...this.currentPerson, name };
-    console.log('Ready person', this.currentPerson);
+    this.persons.push(this.currentPerson);
+    this.currentPerson = null;
+    this.showMessage('Saved!', 1.5);
+    console.log('Ready persons', this.persons);
   }
 
   render() {
@@ -246,6 +258,9 @@ export class WebcamPlayer {
         <div class="container">
           <div class="player-block">
             <video id="player" class={{ 'outlined': this.highlightedPlayer }} width="320" height="240" muted playsinline></video>
+            {this.nameLabel &&
+              <div class="name-label">{ this.nameLabel }</div>
+            }
           </div>
           <canvas id="overlay" width="320" height="240" />
           <div class="button-block">
