@@ -1,4 +1,4 @@
-import { Component, h, Element, getAssetPath, Event, EventEmitter, State, Host } from '@stencil/core';
+import { Component, h, Element, getAssetPath, Event, EventEmitter, State, Host, Watch } from '@stencil/core';
 import * as faceapi from 'face-api.js';
 import uniqid from 'uniqid';
 
@@ -7,6 +7,7 @@ interface Person {
   gender: "male" | "female";
   age: number;
   images: string[];
+  descriptors: Float32Array[];
   name?: string;
 }
 
@@ -25,18 +26,55 @@ export class WebcamPlayer {
   private VIDEO_SIZE = { width: 320, height: 240 };
   private isCountdown: boolean = false;
   private persons: Person[] = [];
-  private isRecognizing: boolean = true;
+  private isRecognizing: boolean = false;
   @Element() private hostElement: HTMLElement;
   @Event() screenshotReceived: EventEmitter;
   @State() highlightedPlayer: boolean = false;
   @State() outputMessage: string = '';
-  @State() nameLabel: string = '123';
+  @State() nameLabel: string = '';
   @State() isNameModal: boolean = false;
   @State() currentPerson: Person;
 
+  private comparisonInterval: number;
+
+  startComparison() {
+    this.comparisonInterval = setInterval(async () => {
+      console.log('Comparison occurs');
+      if (this.persons.length) {
+        const source = await this.takeScreenshot("canvas") as HTMLCanvasElement;
+        const singleFace = await faceapi.detectSingleFace(source, this.opts)
+          .withFaceLandmarks()
+          .withAgeAndGender()
+          .withFaceDescriptor();
+
+        if (singleFace) {
+          this.persons.every(person => {
+            const faceMatcher = new faceapi.FaceMatcher(person.descriptors, 0.8);
+            const result = faceMatcher.findBestMatch(singleFace.descriptor);
+            if (result.distance < 0.40) {
+              this.nameLabel = person.name;
+              console.log('I see', this.nameLabel);
+              return false;
+            }
+            this.nameLabel = '';
+            console.log('Name undefined');
+            return true;
+          });
+          return;
+        }
+        this.nameLabel = '';
+      }
+    }, 5000);
+  }
+
+  stopComparison() {
+    clearInterval(this.comparisonInterval);
+    this.comparisonInterval = null;
+  }
+
   private readonly TINY_OPTIONS = {
     inputSize: 512,
-    scoreThreshold: 0.5
+    scoreThreshold: 0.5,
   }
 
   opts = new faceapi.TinyFaceDetectorOptions(this.TINY_OPTIONS);
@@ -57,6 +95,7 @@ export class WebcamPlayer {
       console.log('Models loaded');
       this.isRecognizing = true;
       await this.onPlay();
+      this.startComparison();
     }
     else {
       alert('Your browser does not support media devices.');
@@ -66,6 +105,7 @@ export class WebcamPlayer {
 
   handleStop() {
     console.log('Stop streaming');
+    this.stopComparison();
     this.isRecognizing = false;
 
     if (null != this.cameraStream) {
@@ -73,7 +113,6 @@ export class WebcamPlayer {
       track.stop();
       this.player.load();
       this.cameraStream = null;
-
       this.clearCanvas(this.canvas);
     }
   }
@@ -92,6 +131,8 @@ export class WebcamPlayer {
   async loadModels() {
     const modelPath = getAssetPath('./models');
     await faceapi.nets.tinyFaceDetector.loadFromUri(modelPath);
+    await faceapi.nets.faceLandmark68Net.loadFromUri(modelPath);
+    await faceapi.nets.faceRecognitionNet.loadFromUri(modelPath);
     await faceapi.nets.ageGenderNet.loadFromUri(modelPath);
   }
 
@@ -209,11 +250,14 @@ export class WebcamPlayer {
 
   async createPerson(shots: HTMLCanvasElement[]) {
     const images: string[] = [];
+    const descriptors = [];
     const age = [];
     const gender = { male: 0, female: 0 };
 
     for await (const frame of shots) {
       const faceDetection = await faceapi.detectSingleFace(frame, this.opts)
+        .withFaceLandmarks()
+        .withFaceDescriptor()
         .withAgeAndGender();
       console.log('Face Detection', faceDetection);
 
@@ -223,6 +267,7 @@ export class WebcamPlayer {
         const faceCanvas = await faceapi.extractFaces(frame, [faceDetection.detection]);
         const faceBase64 = faceCanvas[0].toDataURL('image/jpeg', 0.7);
         images.push(faceBase64);
+        descriptors.push(faceDetection.descriptor);
       }
     }
     this.showModal();
@@ -230,7 +275,8 @@ export class WebcamPlayer {
       id: uniqid(),
       age: Math.round(age.reduce((acc, el) => acc + el) / age.length),
       gender: gender["male"] > gender["female"] ? "male" : "female",
-      images
+      images,
+      descriptors,
     };
   }
 
@@ -259,7 +305,7 @@ export class WebcamPlayer {
           <div class="player-block">
             <video id="player" class={{ 'outlined': this.highlightedPlayer }} width="320" height="240" muted playsinline></video>
             {this.nameLabel &&
-              <div class="name-label">{ this.nameLabel }</div>
+              <div class="name-label">{this.nameLabel}</div>
             }
           </div>
           <canvas id="overlay" width="320" height="240" />
