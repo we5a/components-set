@@ -2,7 +2,7 @@ import { Component, h, Element, getAssetPath, Event, EventEmitter, State, Host, 
 import * as faceapi from 'face-api.js';
 import uniqid from 'uniqid';
 
-interface Person {
+export interface Person {
   id: string;
   gender: "male" | "female";
   age: number;

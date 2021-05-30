@@ -12,6 +12,19 @@
 | `screenshotReceived` |             | `CustomEvent<any>` |
 
 
+## Methods
+
+### `getPersons() => Promise<Person[]>`
+
+
+
+#### Returns
+
+Type: `Promise<Person[]>`
+
+
+
+
 ## Dependencies
 
 ### Depends on
