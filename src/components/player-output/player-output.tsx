@@ -12,9 +12,7 @@ export class PlayerOutput {
     return (
       <Host>
         {this.message}
-        {/* <slot></slot> */}
       </Host>
     );
   }
-
 }

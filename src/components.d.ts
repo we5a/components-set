@@ -29,6 +29,7 @@ export namespace Components {
         "message": string;
     }
     interface WebcamPlayer {
+        "getPersons": () => Promise<Person[]>;
     }
 }
 declare global {

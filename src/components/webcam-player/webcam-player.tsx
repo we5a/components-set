@@ -1,4 +1,4 @@
-import { Component, h, Element, getAssetPath, Event, EventEmitter, State, Host, Watch } from '@stencil/core';
+import { Component, h, Element, getAssetPath, Event, EventEmitter, State, Host, Method } from '@stencil/core';
 import * as faceapi from 'face-api.js';
 import uniqid from 'uniqid';
 
@@ -37,6 +37,18 @@ export class WebcamPlayer {
 
   private comparisonInterval: number;
 
+  private readonly TINY_OPTIONS = {
+    inputSize: 512,
+    scoreThreshold: 0.5,
+  }
+
+  private opts = new faceapi.TinyFaceDetectorOptions(this.TINY_OPTIONS);
+
+  @Method()
+  async getPersons() {
+    return this.persons;
+  }
+
   startComparison() {
     this.comparisonInterval = setInterval(async () => {
       console.log('Comparison occurs');
@@ -71,13 +83,6 @@ export class WebcamPlayer {
     clearInterval(this.comparisonInterval);
     this.comparisonInterval = null;
   }
-
-  private readonly TINY_OPTIONS = {
-    inputSize: 512,
-    scoreThreshold: 0.5,
-  }
-
-  opts = new faceapi.TinyFaceDetectorOptions(this.TINY_OPTIONS);
 
   componentDidLoad() {
     this.player = this.hostElement.querySelector('#player');
