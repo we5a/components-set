@@ -226,7 +226,7 @@ export class WebcamPlayer {
           this.isCountdown = false;
           this.outputMessage = '';
           console.log('Have to start screenshots...');
-          this.takeScreenshotsSeries(5);
+          this.takeScreenshotsSeries(8);
         }
       }, 1000);
     }
@@ -250,7 +250,7 @@ export class WebcamPlayer {
         this.createPerson(screenshots);
         clearInterval(interval);
       }
-    }, 800);
+    }, 450);
   }
 
   async createPerson(shots: HTMLCanvasElement[]) {
@@ -275,7 +275,16 @@ export class WebcamPlayer {
         descriptors.push(faceDetection.descriptor);
       }
     }
+
+    if (descriptors.length <= 3) {
+      this.outputMessage = 'No or poor face detected, try again, please!';
+      setTimeout(() => {
+        this.outputMessage = '';
+      }, 2000);
+      return;
+    }
     this.showModal();
+
     this.currentPerson = {
       id: uniqid(),
       age: Math.round(age.reduce((acc, el) => acc + el) / age.length),
@@ -295,6 +304,7 @@ export class WebcamPlayer {
   }
 
   handleResult(name: string) {
+    // todo write singleton class/service or indexedDB logic for persons
     this.isNameModal = false;
     this.currentPerson = { ...this.currentPerson, name };
     this.persons.push(this.currentPerson);
