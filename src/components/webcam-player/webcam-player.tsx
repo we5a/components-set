@@ -110,14 +110,15 @@ export class WebcamPlayer {
 
   handleStop() {
     console.log('Stop streaming');
-    this.stopComparison();
     this.isRecognizing = false;
+    this.stopComparison();
 
     if (null != this.cameraStream) {
       const track = this.cameraStream.getTracks()[0];
       track.stop();
       this.player.load();
       this.cameraStream = null;
+
       this.clearCanvas(this.canvas);
     }
   }
@@ -142,30 +143,34 @@ export class WebcamPlayer {
   }
 
   async onPlay() {
-    const result = await faceapi.detectSingleFace(this.player, this.opts)
-      .withAgeAndGender()
+    faceapi.detectSingleFace(this.player, this.opts)
+      .withAgeAndGender().run().then((result) => {
+        if (result) {
+          faceapi.matchDimensions(this.canvas, this.player, true);
+          faceapi.draw.drawDetections(this.canvas, result);
 
-    if (result) {
-      faceapi.matchDimensions(this.canvas, this.player, true);
-      faceapi.draw.drawDetections(this.canvas, result);
+          const { age, gender, genderProbability } = result;
+          const interpolatedAge = this.interpolateAgePredictions(age)
 
-      const { age, gender, genderProbability } = result;
-      const interpolatedAge = this.interpolateAgePredictions(age)
+          new faceapi.draw.DrawTextField(
+            [
+              `${faceapi.utils.round(interpolatedAge, 0)} years`,
+              `${gender} (${faceapi.utils.round(genderProbability)})`
+            ],
+            result.detection.box.bottomLeft
+          ).draw(this.canvas);
+        }
 
-      new faceapi.draw.DrawTextField(
-        [
-          `${faceapi.utils.round(interpolatedAge, 0)} years`,
-          `${gender} (${faceapi.utils.round(genderProbability)})`
-        ],
-        result.detection.box.bottomLeft
-      ).draw(this.canvas);
-    }
+        if (this.isRecognizing) {
+          setTimeout(() => {
+            this.onPlay();
+          });
+        }
 
-    if (this.isRecognizing) {
-      setTimeout(() => {
-        this.onPlay();
-      });
-    }
+      }).catch(e => {
+        console.log('Exit with error');
+      })
+
   }
 
   handleScreenshot() {
