@@ -9,6 +9,7 @@
 
 | Event                | Description | Type               |
 | -------------------- | ----------- | ------------------ |
+| `personsUpdated`     |             | `CustomEvent<any>` |
 | `screenshotReceived` |             | `CustomEvent<any>` |
 
 

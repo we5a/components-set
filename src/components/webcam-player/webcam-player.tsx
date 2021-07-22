@@ -29,6 +29,7 @@ export class WebcamPlayer {
   private isRecognizing: boolean = false;
   @Element() private hostElement: HTMLElement;
   @Event() screenshotReceived: EventEmitter;
+  @Event() personsUpdated: EventEmitter;
   @State() highlightedPlayer: boolean = false;
   @State() outputMessage: string = '';
   @State() nameLabel: string = '';
@@ -168,9 +169,8 @@ export class WebcamPlayer {
         }
 
       }).catch(e => {
-        console.log('Exit with error');
-      })
-
+        console.log('Exit with error', e?.message);
+      });
   }
 
   handleScreenshot() {
@@ -316,6 +316,7 @@ export class WebcamPlayer {
     this.currentPerson = null;
     this.showMessage('Saved!', 1.5);
     console.log('Ready persons', this.persons);
+    this.personsUpdated.emit(this.persons);
   }
 
   render() {

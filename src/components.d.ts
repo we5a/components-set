@@ -5,6 +5,7 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
+import { Person } from "./components/webcam-player/webcam-player";
 export namespace Components {
     interface MainModal {
         "cancelModal": () => void;
@@ -87,6 +88,7 @@ declare namespace LocalJSX {
         "message"?: string;
     }
     interface WebcamPlayer {
+        "onPersonsUpdated"?: (event: CustomEvent<any>) => void;
         "onScreenshotReceived"?: (event: CustomEvent<any>) => void;
     }
     interface IntrinsicElements {
